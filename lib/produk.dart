@@ -1,14 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:csv/csv.dart';
-import 'package:external_path/external_path.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:sqlitecase/sql_helper/sql_helper_produk.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:get/get.dart';
+import 'package:sqlitecase/service/CsvExporter.dart';
+import 'package:sqlitecase/service/CsvImporter.dart';
+import 'package:sqlitecase/sql_helper/sql_helper.dart';
+import 'package:sqlitecase/view/ScanBarcode.dart';
 
 class Produk extends StatefulWidget {
   const Produk({Key? key}) : super(key: key);
@@ -27,7 +22,6 @@ class _ProdukState extends State<Produk> {
     setState(() {
       _produk = data;
       _isLoading = false;
-      print(_produk);
     });
   }
 
@@ -35,7 +29,7 @@ class _ProdukState extends State<Produk> {
   void initState() {
     super.initState();
     _refreshProduk();
-    print("Total data: ${_produk.length + 1}");
+    // print("Total data: ${_produk.length + 1}");
   }
 
   final TextEditingController _namaProdukController = TextEditingController();
@@ -44,89 +38,101 @@ class _ProdukState extends State<Produk> {
   final TextEditingController _stokController = TextEditingController();
   final TextEditingController _deskripsiController = TextEditingController();
 
-  void importCSV() async {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+  // void importCSV() async {
+  //   final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+  //
+  //   //File kosong
+  //   if (result == null) return;
+  //   print(result.files.first.name);
+  //
+  //   _filePath = result.files.single.path;
+  //
+  //   final input = File(_filePath!).openRead();
+  //   final fields = await input
+  //       .transform(utf8.decoder)
+  //       .transform(const CsvToListConverter())
+  //       .toList();
+  //   print(fields);
+  //   final db = await SQLHelper.db();
+  //   for (var i = 1; i < fields.length; i++) {
+  //     var data = {
+  //       'id': fields[i][0],
+  //       'nama_produk': fields[i][1],
+  //       'harga': fields[i][2],
+  //       'kode_barcode': fields[i][3],
+  //       'stok': fields[i][4],
+  //       'deskripsi': fields[i][5],
+  //       'created_at': fields[i][6],
+  //       'updated_at': fields[i][7],
+  //     };
+  //     await db.insert('produk', data,
+  //         conflictAlgorithm: ConflictAlgorithm.replace);
+  //   }
+  //   _refreshProduk();
+  // }
 
-    //File kosong
-    if (result == null) return;
-    print(result.files.first.name);
-
-    _filePath = result.files.single.path;
-
-    final input = File(_filePath!).openRead();
-    final fields = await input
-        .transform(utf8.decoder)
-        .transform(const CsvToListConverter())
-        .toList();
-    print(fields);
-    final db = await SQLHelper.db();
-    for (var i = 1; i < fields.length; i++) {
-      var data = {
-        'id': fields[i][0],
-        'nama_produk': fields[i][1],
-        'harga': fields[i][2],
-        'kode_barcode': fields[i][3],
-        'stok': fields[i][4],
-        'deskripsi': fields[i][5],
-        'created_at': fields[i][6],
-      };
-      await db.insert('produk', data,
-          conflictAlgorithm: ConflictAlgorithm.replace);
-    }
-    _refreshProduk();
-  }
-
-  void exportCSV() async {
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.storage,
-    ].request();
-
-    print(statuses);
-
-    List<List<dynamic>> rows = [];
-    List<dynamic> row = [];
-
-    row.add("id");
-    row.add("nama_produk");
-    row.add("harga");
-    row.add("kode_barcode");
-    row.add("stok");
-    row.add("deskripsi");
-    row.add("created_at");
-    rows.add(row);
-
-    for (int i = 0; i < _produk.length; i++) {
-      List<dynamic> row = [];
-      row.add(_produk[i]["id"] - 1);
-      row.add(_produk[i]["nama_produk"]);
-      row.add(_produk[i]["harga"]);
-      row.add(_produk[i]["kode_barcode"]);
-      row.add(_produk[i]["stok"]);
-      row.add(_produk[i]["deskripsi"]);
-      row.add(_produk[i]["created_at"]);
-      rows.add(row);
-    }
-
-    String csv = const ListToCsvConverter().convert(rows);
-
-    String dir = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_DOWNLOADS);
-    print("dir $dir");
-    String file = "$dir";
-
-    File f = File(file + "/produk.csv");
-
-    f.writeAsString(csv);
-
-    Fluttertoast.showToast(
-        msg: "File CSV telah tersimpan di ${file}/produk.csv",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
-  }
+  // void exportCSV() async {
+  //   final status = await Permission.storage.request();
+  //   if (status.isGranted) {
+  //     final statuses = await Permission.storage.status;
+  //     print(statuses);
+  //   } else {
+  //     Fluttertoast.showToast(
+  //         msg: "Izin tidak diberikan",
+  //         toastLength: Toast.LENGTH_SHORT,
+  //         gravity: ToastGravity.BOTTOM,
+  //         timeInSecForIosWeb: 1,
+  //         backgroundColor: Colors.white,
+  //         textColor: Colors.black,
+  //         fontSize: 16.0);
+  //   }
+  //
+  //   List<List<dynamic>> rows = [];
+  //   List<dynamic> row = [];
+  //
+  //   row.add("id");
+  //   row.add("nama_produk");
+  //   row.add("harga");
+  //   row.add("kode_barcode");
+  //   row.add("stok");
+  //   row.add("deskripsi");
+  //   row.add("created_at");
+  //   row.add("updated_at");
+  //   rows.add(row);
+  //
+  //   for (int i = 0; i < _produk.length; i++) {
+  //     List<dynamic> row = [];
+  //     row.add(_produk[i]["id"] - 1);
+  //     row.add(_produk[i]["nama_produk"]);
+  //     row.add(_produk[i]["harga"]);
+  //     row.add(_produk[i]["kode_barcode"]);
+  //     row.add(_produk[i]["stok"]);
+  //     row.add(_produk[i]["deskripsi"]);
+  //     row.add(_produk[i]["created_at"]);
+  //     row.add(_produk[i]["updated_at"]);
+  //     rows.add(row);
+  //   }
+  //
+  //   String csv = const ListToCsvConverter().convert(rows);
+  //
+  //   String dir = await ExternalPath.getExternalStoragePublicDirectory(
+  //       ExternalPath.DIRECTORY_DOWNLOADS);
+  //   print("dir $dir");
+  //   String file = "$dir";
+  //
+  //   File f = File(file + "/produk.csv");
+  //
+  //   f.writeAsString(csv);
+  //
+  //   Fluttertoast.showToast(
+  //       msg: "File CSV telah tersimpan di ${file}/produk.csv",
+  //       toastLength: Toast.LENGTH_SHORT,
+  //       gravity: ToastGravity.CENTER,
+  //       timeInSecForIosWeb: 1,
+  //       backgroundColor: Colors.white,
+  //       textColor: Colors.black,
+  //       fontSize: 16.0);
+  // }
 
   Future<void> _addItem() async {
     await SQLHelper.createItem(
@@ -136,7 +142,7 @@ class _ProdukState extends State<Produk> {
         _stokController.text,
         _deskripsiController.text);
     _refreshProduk();
-    print("Jumlah Produk: ${_produk.length + 1}");
+    // print("Jumlah Produk: ${_produk.length + 1}");
   }
 
   Future<void> _updateItem(int id) async {
@@ -164,85 +170,94 @@ class _ProdukState extends State<Produk> {
         context: context,
         elevation: 5,
         isScrollControlled: true,
-        builder: (_) => Container(
-              padding: EdgeInsets.only(
-                  top: 15,
-                  left: 15,
-                  right: 15,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 120),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    height: 5,
-                  ),
-                  TextField(
-                    controller: _namaProdukController,
-                    decoration: const InputDecoration(
-                      hintText: 'Nama Produk',
+        builder: (_) => SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.only(
+                    top: 15,
+                    left: 15,
+                    right: 15,
+                    bottom: MediaQuery.of(context).viewInsets.bottom + 120),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const SizedBox(
+                      height: 5,
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextField(
-                    controller: _hargaController,
-                    decoration: const InputDecoration(
-                      hintText: 'Harga',
+                    TextField(
+                      controller: _namaProdukController,
+                      decoration: const InputDecoration(
+                        hintText: 'Nama Produk',
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextField(
-                    controller: _kodeBarcodeController,
-                    decoration: const InputDecoration(
-                      hintText: 'Kode Barcode',
+                    const SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextField(
-                    controller: _stokController,
-                    decoration: const InputDecoration(
-                      hintText: 'Stok',
+                    TextField(
+                      controller: _hargaController,
+                      decoration: const InputDecoration(
+                        hintText: 'Harga',
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  TextField(
-                    controller: _deskripsiController,
-                    decoration: const InputDecoration(
-                      hintText: 'Deskripsi',
+                    const SizedBox(
+                      height: 10,
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (id == null) {
-                        await _addItem();
-                      }
-                      if (id != null) {
-                        await _updateItem(id);
-                      }
-                      //Clear Form
-                      _namaProdukController.text = '';
-                      _hargaController.text = '';
-                      _kodeBarcodeController.text = '';
-                      _stokController.text = '';
-                      _deskripsiController.text = '';
+                    TextField(
+                      controller: _kodeBarcodeController,
+                      decoration: InputDecoration(
+                        hintText: 'Kode Barcode',
+                        suffixIcon: GestureDetector(
+                          child: const Icon(Icons.qr_code_scanner),
+                          onTap: () => Get.to(() => const ScanBarcode()),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      controller: _stokController,
+                      decoration: const InputDecoration(
+                        hintText: 'Stok',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextField(
+                      controller: _deskripsiController,
+                      decoration: const InputDecoration(
+                        hintText: 'Deskripsi',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (id == null) {
+                          await _addItem();
+                        }
+                        if (id != null) {
+                          await _updateItem(id);
+                        }
+                        //Clear Form
+                        _namaProdukController.text = '';
+                        _hargaController.text = '';
+                        _kodeBarcodeController.text = '';
+                        _stokController.text = '';
+                        _deskripsiController.text = '';
 
-                      //Bottomsheet Close
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(id == null ? 'Tambah' : 'Update'),
-                  )
-                ],
+                        //Bottomsheet Close
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        id == null ? 'Tambah' : 'Update',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ));
   }
@@ -251,24 +266,30 @@ class _ProdukState extends State<Produk> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Studi Kasus SQLITE'),
+        title: const Text(
+          'Proyek Akhir',
+          style: TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.upload,
               color: Colors.white,
             ),
-            onPressed: () {
-              exportCSV();
+            onPressed: () async {
+              CsvExporter exporter = CsvExporter(_produk);
+              await exporter.exportCSV();
             },
           ),
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.download,
               color: Colors.white,
             ),
-            onPressed: () {
-              importCSV();
+            onPressed: () async {
+              CsvImporter importer = CsvImporter();
+              await importer.importCSV();
+              _refreshProduk();
             },
           )
         ],
@@ -276,7 +297,7 @@ class _ProdukState extends State<Produk> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
@@ -294,7 +315,7 @@ class _ProdukState extends State<Produk> {
                       Container(
                         width: 100,
                         height: 100,
-                        decoration: BoxDecoration(color: Colors.blue),
+                        child: Image.asset('lib/assets/images/tea_dummy.png'),
                       ),
                       Text(item['nama_produk']),
                       Row(
@@ -325,7 +346,10 @@ class _ProdukState extends State<Produk> {
         onPressed: () {
           _showForm(null);
         },
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }

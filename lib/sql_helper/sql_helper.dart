@@ -6,20 +6,30 @@ import 'package:sqflite/sqflite.dart' as sql;
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS produk (
-    id INTEGER PRIMARY KEY, 
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
     nama_produk TEXT, 
     harga TEXT, 
     kode_barcode TEXT, 
     stok TEXT, 
     deskripsi TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT,
+    updated_at TEXT
+    )
+    """);
+    await database.execute("""CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    username TEXT,
+    email TEXT,
+    password TEXT,
+    created_at TEXT,
+    updated_at TEXT
     )
     """);
   }
 
   static Future<sql.Database> db() async {
     return sql.openDatabase(
-      'produk.db',
+      'kasirq.db',
       version: 1,
       onCreate: (sql.Database database, int version) async {
         // print("Create DB...");
@@ -37,6 +47,8 @@ class SQLHelper {
       'kode_barcode': kode_barcode,
       'stok': stok,
       'deskripsi': deskripsi,
+      'created_at': DateTime.now().toString(),
+      'updated_at': DateTime.now().toString(),
     };
     final id = await db.insert('produk', data,
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
@@ -62,7 +74,7 @@ class SQLHelper {
       'kode_barcode': kode_barcode,
       'stok': stok,
       'deskripsi': deskripsi,
-      'created_at': DateTime.now().toString(),
+      'updated_at': DateTime.now().toString(),
     };
     final result =
         await db.update('produk', data, where: 'id = ?', whereArgs: [id]);
@@ -76,5 +88,21 @@ class SQLHelper {
     } catch (error) {
       debugPrint("Something error when deleting your product: $error");
     }
+  }
+
+//Method menambahkan user
+  static Future<int> createUser(
+      String username, String email, String password) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'username': username,
+      'email': email,
+      'password': password,
+      'created_at': DateTime.now().toString(),
+      'updated_at': DateTime.now().toString(),
+    };
+    final id = await db.insert('users', data,
+        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+    return id;
   }
 }
