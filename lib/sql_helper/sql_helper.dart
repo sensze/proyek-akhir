@@ -1,12 +1,10 @@
-import 'dart:ffi';
-
 import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS produk (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    id INTEGER PRIMARY KEY AUTOINCREMENT=1, 
     nama_produk TEXT, 
     harga TEXT, 
     kode_barcode TEXT, 
@@ -102,7 +100,7 @@ class SQLHelper {
       'updated_at': DateTime.now().toString(),
     };
     final id = await db.insert('users', data,
-        conflictAlgorithm: sql.ConflictAlgorithm.replace);
+        conflictAlgorithm: sql.ConflictAlgorithm.ignore);
     return id;
   }
 }

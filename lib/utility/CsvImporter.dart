@@ -26,7 +26,6 @@ class CsvImporter {
     final db = await SQLHelper.db();
     for (var i = 1; i < fields.length; i++) {
       var data = {
-        'id': fields[i][0],
         'nama_produk': fields[i][1],
         'harga': fields[i][2],
         'kode_barcode': fields[i][3],

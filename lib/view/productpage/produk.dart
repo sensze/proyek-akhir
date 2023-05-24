@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sqlitecase/service/CsvExporter.dart';
-import 'package:sqlitecase/service/CsvImporter.dart';
-import 'package:sqlitecase/sql_helper/sql_helper.dart';
-import 'package:sqlitecase/view/ScanBarcode.dart';
+import 'package:kasirq/service/CsvExporter.dart';
+import 'package:kasirq/service/CsvImporter.dart';
+import 'package:kasirq/sql_helper/sql_helper.dart';
+import 'package:kasirq/view/ScanBarcode.dart';
+import 'package:kasirq/view/socket/SendDataPage.dart';
+import 'package:kasirq/view/socket/ReceiveDataPage.dart';
 
 class Produk extends StatefulWidget {
   const Produk({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class _ProdukState extends State<Produk> {
     setState(() {
       _produk = data;
       _isLoading = false;
+      print(_produk);
     });
   }
 
@@ -153,6 +156,7 @@ class _ProdukState extends State<Produk> {
         _kodeBarcodeController.text,
         _stokController.text,
         _deskripsiController.text);
+    _refreshProduk();
   }
 
   void _showForm(int? id) async {
@@ -267,7 +271,7 @@ class _ProdukState extends State<Produk> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Proyek Akhir',
+          'Produk',
           style: TextStyle(color: Colors.white),
         ),
         actions: [
@@ -276,71 +280,96 @@ class _ProdukState extends State<Produk> {
               Icons.upload,
               color: Colors.white,
             ),
-            onPressed: () async {
-              CsvExporter exporter = CsvExporter(_produk);
-              await exporter.exportCSV();
-            },
+            onPressed: () => {Get.to(() => const SendDataPage())},
           ),
           IconButton(
             icon: const Icon(
               Icons.download,
               color: Colors.white,
             ),
-            onPressed: () async {
-              CsvImporter importer = CsvImporter();
-              await importer.importCSV();
-              _refreshProduk();
-            },
-          )
+            onPressed: () => {Get.to(() => const ReceiveDataPage())},
+          ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 5.0,
-              mainAxisSpacing: 5.0,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                    onPressed: () async {
+                      CsvImporter importer = CsvImporter();
+                      await importer.importCSV();
+                      _refreshProduk();
+                    },
+                    child: const Text(
+                      "Import CSV",
+                      style: TextStyle(color: Colors.white),
+                    )),
+                ElevatedButton(
+                    onPressed: () async {
+                      CsvExporter exporter = CsvExporter(_produk);
+                      await exporter.exportCSV();
+                    },
+                    child: const Text(
+                      "Export CSV",
+                      style: TextStyle(color: Colors.white),
+                    )),
+              ],
             ),
-            // physics: NeverScrollableScrollPhysics(),
-            itemCount: _produk.length,
-            itemBuilder: (context, index) {
-              final item = _produk[index];
-              return Container(
-                height: 500,
-                child: Card(
-                  elevation: 3,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        child: Image.asset('lib/assets/images/tea_dummy.png'),
-                      ),
-                      Text(item['nama_produk']),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              _showForm(item['id']);
-                            },
-                            icon: const Icon(Icons.edit),
-                          ),
-                          IconButton(
-                            onPressed: () async {
-                              await SQLHelper.deleteItem(item['id']);
-                              _refreshProduk();
-                            },
-                            icon: const Icon(Icons.delete),
-                          ),
-                        ],
-                      )
-                    ],
+            Expanded(
+              child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 5.0,
+                    mainAxisSpacing: 5.0,
                   ),
-                ),
-              );
-            }),
+                  // physics: NeverScrollableScrollPhysics(),
+                  itemCount: _produk.length,
+                  itemBuilder: (context, index) {
+                    final item = _produk[index];
+                    return Container(
+                      height: 500,
+                      child: Card(
+                        elevation: 3,
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              child: Image.asset(
+                                  'lib/assets/images/tea_dummy.png'),
+                            ),
+                            Text(item['nama_produk']),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    _showForm(item['id']);
+                                  },
+                                  icon: const Icon(Icons.edit),
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    await SQLHelper.deleteItem(item['id']);
+                                    _refreshProduk();
+                                  },
+                                  icon: const Icon(Icons.delete),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

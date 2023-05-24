@@ -30,7 +30,6 @@ class CsvExporter {
     List<List<dynamic>> rows = [];
     List<dynamic> row = [];
 
-    row.add("id");
     row.add("nama_produk");
     row.add("harga");
     row.add("kode_barcode");
@@ -42,7 +41,6 @@ class CsvExporter {
 
     for (int i = 0; i < produk.length; i++) {
       List<dynamic> row = [];
-      row.add(produk[i]["id"] - 1);
       row.add(produk[i]["nama_produk"]);
       row.add(produk[i]["harga"]);
       row.add(produk[i]["kode_barcode"]);
