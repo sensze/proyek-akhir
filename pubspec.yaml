@@ -88,6 +88,7 @@ flutter:
     #Animation
   - lib/assets/anim/success.json
   - lib/assets/anim/error.json
+  - lib/assets/anim/payment-success.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

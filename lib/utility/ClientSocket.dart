@@ -6,11 +6,17 @@ import '../sql_helper/sql_helper.dart';
 Future<String> getData() async {
   List<Map<String, dynamic>> dataFromSqflite = [];
   final data = await SQLHelper.getItems();
-  dataFromSqflite = data;
+
+  // Exclude the "id" field from each data item
+  for (var dataItem in data) {
+    Map<String, dynamic> newDataItem = Map<String, dynamic>.from(dataItem);
+    newDataItem.remove('id');
+    dataFromSqflite.add(newDataItem);
+  }
+
   String jsonString = jsonEncode(dataFromSqflite);
   print(jsonString);
   return jsonString;
-  /*saveJsonToFile(jsonString, "data");*/
 }
 
 Future<void> sendData(String ipAddress, String data) async {

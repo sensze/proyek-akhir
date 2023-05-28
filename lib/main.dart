@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kasirq/const/colors.dart';
-import 'package:kasirq/const/colors.dart';
-import 'package:kasirq/dummy.dart';
-import 'package:kasirq/service/ClientSocket.dart';
-import 'package:kasirq/service/ServerSocket.dart';
-import 'package:kasirq/view/authentication/registerpage.dart';
 import 'package:kasirq/view/dashboard/dashboard.dart';
 
 void main() {
@@ -24,6 +19,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: primarySwatch,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: primarySwatch,
+          elevation: 0,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
       ),
       home: const Dashboard(),
     );

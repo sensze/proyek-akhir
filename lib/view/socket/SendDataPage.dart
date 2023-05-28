@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:kasirq/service/ClientSocket.dart';
+import 'package:kasirq/utility/ClientSocket.dart';
 
 import '../../sql_helper/sql_helper.dart';
 

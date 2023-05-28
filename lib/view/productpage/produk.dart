@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kasirq/service/CsvExporter.dart';
-import 'package:kasirq/service/CsvImporter.dart';
 import 'package:kasirq/sql_helper/sql_helper.dart';
-import 'package:kasirq/view/ScanBarcode.dart';
-import 'package:kasirq/view/socket/SendDataPage.dart';
+import 'package:kasirq/utility/CsvExporter.dart';
+import 'package:kasirq/utility/CsvImporter.dart';
+import 'package:kasirq/view/productpage/ScanBarcode.dart';
 import 'package:kasirq/view/socket/ReceiveDataPage.dart';
+import 'package:kasirq/view/socket/SendDataPage.dart';
 
 class Produk extends StatefulWidget {
   const Produk({Key? key}) : super(key: key);
@@ -289,6 +289,12 @@ class _ProdukState extends State<Produk> {
             ),
             onPressed: () => {Get.to(() => const ReceiveDataPage())},
           ),
+          IconButton(
+              onPressed: _refreshProduk,
+              icon: const Icon(
+                Icons.refresh,
+                color: Colors.white,
+              )),
         ],
       ),
       body: Padding(

@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:kasirq/view/productpage/produk.dart';
+import 'package:kasirq/view/transaction/Transaction.dart';
 
 import '../../sql_helper/sql_helper.dart';
 
@@ -17,7 +18,7 @@ class _DashboardState extends State<Dashboard> {
   List<Map<String, dynamic>> _produk = [];
   bool _isLoading = true;
   String dateNow =
-      DateFormat().addPattern("EEEE, dd MMMM yyyy").format(DateTime.now());
+  DateFormat().addPattern("EEEE, dd MMMM yyyy").format(DateTime.now());
 
   void _refreshProduk() async {
     final data = await SQLHelper.getItems();
@@ -78,7 +79,9 @@ class _DashboardState extends State<Dashboard> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            Get.to(() => const Transaction());
+                          },
                           child: SvgPicture.asset(
                             "lib/assets/icons/ic_transaction.svg",
                             height: 60,
@@ -108,7 +111,9 @@ class _DashboardState extends State<Dashboard> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+
+                          },
                           child: SvgPicture.asset(
                             "lib/assets/icons/ic_history.svg",
                             height: 50,
@@ -177,14 +182,10 @@ class _DashboardState extends State<Dashboard> {
                         fontWeight: FontWeight.bold),
                   ),
                   TextButton(
-                    onPressed: () => {Get.to(() => const Produk())},
-                    child: const Text(
-                      "Selengkapnya",
-                      style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 18,
-                          fontFamily: "Roboto",
-                          fontWeight: FontWeight.w500),
+                    onPressed: () => {_refreshProduk()},
+                    child: const Icon(
+                      Icons.refresh,
+                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -208,22 +209,35 @@ class _DashboardState extends State<Dashboard> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      subtitle: Text(
-                        _produk[index]['harga'],
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                      subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Harga: ${_produk[index]['harga']}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      trailing: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.edit,
-                          color: Colors.green,
+                        Text(
+                          "Stok: ${_produk[index]['stok']}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
+                      ],
+                    ),
+                    trailing: IconButton(
+                      onPressed: () {
+                        Get.to(const Produk());
+                      },
+                      icon: const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: Colors.grey,
                       ),
                     ),
-                  );
+                  ),);
                 },
               ),
             ],

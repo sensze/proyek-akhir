@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kasirq/service/ServerSocket.dart';
+import 'package:kasirq/utility/ServerSocket.dart';
 
 class ReceiveDataPage extends StatefulWidget {
   const ReceiveDataPage({Key? key}) : super(key: key);
@@ -29,6 +29,7 @@ class _ReceiveDataPageState extends State<ReceiveDataPage> {
       _buttonLabel = "Close Connection";
     });
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -23,19 +23,20 @@ class CsvImporter {
         .transform(utf8.decoder)
         .transform(const CsvToListConverter())
         .toList();
+    print(fields);
     final db = await SQLHelper.db();
-    for (var i = 1; i < fields.length; i++) {
+    for (var i = 0; i < fields.length; i++) {
       var data = {
-        'nama_produk': fields[i][1],
-        'harga': fields[i][2],
-        'kode_barcode': fields[i][3],
-        'stok': fields[i][4],
-        'deskripsi': fields[i][5],
-        'created_at': fields[i][6],
-        'updated_at': fields[i][7],
+        'nama_produk': fields[i][0],
+        'harga': fields[i][1],
+        'kode_barcode': fields[i][2],
+        'stok': fields[i][3],
+        'deskripsi': fields[i][4],
+        'created_at': fields[i][5],
+        'updated_at': fields[i][6],
       };
       await db.insert('produk', data,
-          conflictAlgorithm: ConflictAlgorithm.replace);
+          conflictAlgorithm: ConflictAlgorithm.ignore);
     }
   }
 }

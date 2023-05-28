@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart' as sql;
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE IF NOT EXISTS produk (
-    id INTEGER PRIMARY KEY AUTOINCREMENT=1, 
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
     nama_produk TEXT, 
     harga TEXT, 
     kode_barcode TEXT, 
@@ -19,6 +19,16 @@ class SQLHelper {
     username TEXT,
     email TEXT,
     password TEXT,
+    created_at TEXT,
+    updated_at TEXT
+    )
+    """);
+    await database.execute("""CREATE TABLE IF NOT EXISTS penjualan (
+    id_penjualan INTEGER PRIMARY KEY AUTOINCREMENT, 
+    total_item TEXT,
+    total_harga TEXT,
+    bayar TEXT,
+    diterima TEXT,
     created_at TEXT,
     updated_at TEXT
     )
@@ -75,7 +85,7 @@ class SQLHelper {
       'updated_at': DateTime.now().toString(),
     };
     final result =
-        await db.update('produk', data, where: 'id = ?', whereArgs: [id]);
+    await db.update('produk', data, where: 'id = ?', whereArgs: [id]);
     return result;
   }
 
@@ -88,9 +98,19 @@ class SQLHelper {
     }
   }
 
+  static Future<int> updateStock(int id, String stok) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'stok': stok,
+    };
+    final result =
+    await db.update('produk', data, where: 'id = ?', whereArgs: [id]);
+    return result;
+  }
+
 //Method menambahkan user
-  static Future<int> createUser(
-      String username, String email, String password) async {
+  static Future<int> createUser(String username, String email,
+      String password) async {
     final db = await SQLHelper.db();
     final data = {
       'username': username,
@@ -103,4 +123,26 @@ class SQLHelper {
         conflictAlgorithm: sql.ConflictAlgorithm.ignore);
     return id;
   }
+
+// Method penjualan
+  static Future<int> createPenjualan(String total_item, String total_harga,
+      String bayar, String diterima) async {
+    final db = await SQLHelper.db();
+    final data = {
+      'total_item': total_item,
+      'total_harga': total_harga,
+      'bayar': bayar,
+      'diterima': diterima,
+      'created_at': DateTime.now().toString(),
+      'updated_at': DateTime.now().toString(),
+    };
+    final id = await db.insert('penjualan', data,
+        conflictAlgorithm: sql.ConflictAlgorithm.ignore);
+    return id;
+  }
+  static Future<List<Map<String, dynamic>>> getTransaksi() async {
+    final db = await SQLHelper.db();
+    return db.query('penjualan', orderBy: 'id_penjualan');
+  }
 }
+

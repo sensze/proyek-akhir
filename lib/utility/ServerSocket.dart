@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:kasirq/sql_helper/sql_helper.dart';
+import 'package:sqflite/sqflite.dart';
+
 ServerSocket? serverSocket;
 
 Future<String?> getIp() async {
@@ -10,7 +13,7 @@ Future<String?> getIp() async {
   NetworkInterface? networkInterface;
   try {
     networkInterface = interfaces.firstWhere(
-      (interface) => interface.addresses.any((addr) => !addr.isLoopback),
+          (interface) => interface.addresses.any((addr) => !addr.isLoopback),
     );
   } catch (e) {
     // Penanganan jika tidak ada interface yang ditemukan
@@ -41,17 +44,27 @@ Future<void> startServer(String? ipAddress) async {
 
   serverSocket = await ServerSocket.bind(alamatIp.toString(), portServer);
   print(
-      'Server berjalan di alamat: ${serverSocket!.address}, port: ${serverSocket!.port}');
+      'Server berjalan di alamat: ${serverSocket!
+          .address}, port: ${serverSocket!.port}');
 
   serverSocket!.listen((socket) {
     print(
-        'Koneksi diterima dari: ${socket.remoteAddress.address}:${socket.remotePort}');
+        'Koneksi diterima dari: ${socket.remoteAddress.address}:${socket
+            .remotePort}');
 
     socket.listen((List<int> data) async {
       String receivedData = utf8.decode(data);
       print('Data diterima dari client: $receivedData');
 
-        /*// *Parse CSV
+      List<dynamic> jsonData = json.decode(receivedData);
+      print("Ini data json nya ${jsonData}");
+      final db = await SQLHelper.db();
+      for (var dataItem in jsonData) {
+        Map<String, dynamic> dataMap = Map<String, dynamic>.from(dataItem);
+        await db.insert('produk', dataMap, conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+
+    /*// *Parse CSV
         List<List<dynamic>> csvData = CsvToListConverter().convert(receivedData);
         print("Ini data csv nya ${csvData}");
 
@@ -81,17 +94,20 @@ Future<void> startServer(String? ipAddress) async {
         await file.writeAsString(csvString, flush: true);
         print('CSV file saved successfully at: $filePath');*/
 
-      // Mengirim respons ke client
-      String response = 'Respons dari server';
-      socket.write(response);
-    });
-  }).onError((e) {
-    print('Koneksi gagal: $e');
+    // Mengirim respons ke client
+    String response = 'Respons dari server';
+    socket.write(response);
   });
+}).
+onError
+(
+(e) {
+print('Koneksi gagal: $e');
+});
 }
 
 void stopServer(){
-  serverSocket?.close();
-  serverSocket = null;
-  print("Server ditutup");
+serverSocket?.close();
+serverSocket = null;
+print("Server ditutup");
 }
