@@ -1,3 +1,3 @@
 # sqlitecase
 
-Proyek Akhir.
+Aplikasi Point of Sales(POS) Serverless berbasis Mobile (Flutter)
