@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:kasirq/sql_helper/sql_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -13,7 +15,7 @@ Future<String?> getIp() async {
   NetworkInterface? networkInterface;
   try {
     networkInterface = interfaces.firstWhere(
-          (interface) => interface.addresses.any((addr) => !addr.isLoopback),
+      (interface) => interface.addresses.any((addr) => !addr.isLoopback),
     );
   } catch (e) {
     // Penanganan jika tidak ada interface yang ditemukan
@@ -38,33 +40,60 @@ Future<String?> getIp() async {
     startServer(ipAddress);
   }
 }*/
-Future<void> startServer(String? ipAddress) async {
+Future<void> startServer(String? ipAddress, String source) async {
   String? alamatIp = ipAddress;
   int portServer = 8888;
 
   serverSocket = await ServerSocket.bind(alamatIp.toString(), portServer);
   print(
-      'Server berjalan di alamat: ${serverSocket!
-          .address}, port: ${serverSocket!.port}');
+      'Server berjalan di alamat: ${serverSocket!.address}, port: ${serverSocket!.port}');
 
   serverSocket!.listen((socket) {
     print(
-        'Koneksi diterima dari: ${socket.remoteAddress.address}:${socket
-            .remotePort}');
+        'Koneksi diterima dari: ${socket.remoteAddress.address}:${socket.remotePort}');
 
     socket.listen((List<int> data) async {
+      /*String receivedData = utf8.decode(data);
+      print('Data diterima dari client: $receivedData');
+
+      List<dynamic> jsonData = json.decode(receivedData);
+      print("Ini data json nya ${jsonData}");*/
+
       String receivedData = utf8.decode(data);
       print('Data diterima dari client: $receivedData');
 
       List<dynamic> jsonData = json.decode(receivedData);
       print("Ini data json nya ${jsonData}");
-      final db = await SQLHelper.db();
-      for (var dataItem in jsonData) {
-        Map<String, dynamic> dataMap = Map<String, dynamic>.from(dataItem);
-        await db.insert('produk', dataMap, conflictAlgorithm: ConflictAlgorithm.ignore);
+
+      if (source == 'produk') {
+        final db = await SQLHelper.db();
+        for (var dataItem in jsonData) {
+          Map<String, dynamic> dataMap = Map<String, dynamic>.from(dataItem);
+          await db.insert('produk', dataMap,
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
+        Get.snackbar(
+          'Sukses',
+          'Data transaksi berhasil diterima',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }else{
+        final db = await SQLHelper.db();
+        for (var dataItem in jsonData) {
+          Map<String, dynamic> dataMap = Map<String, dynamic>.from(dataItem);
+          await db.insert('penjualan', dataMap,
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
+        Get.snackbar(
+          'Sukses',
+          'Data transaksi berhasil diterima',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       }
 
-    /*// *Parse CSV
+      /*// *Parse CSV
         List<List<dynamic>> csvData = CsvToListConverter().convert(receivedData);
         print("Ini data csv nya ${csvData}");
 
@@ -94,20 +123,23 @@ Future<void> startServer(String? ipAddress) async {
         await file.writeAsString(csvString, flush: true);
         print('CSV file saved successfully at: $filePath');*/
 
-    // Mengirim respons ke client
-    String response = 'Respons dari server';
-    socket.write(response);
+      // Mengirim respons ke client
+      String response = 'Respons dari server';
+      socket.write(response);
+    });
+  }).onError((error) {
+    Get.snackbar(
+      'Gagal',
+      'Tidak dapat terhubung ke client:  ${error.toString()}',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 5),
+    );
   });
-}).
-onError
-(
-(e) {
-print('Koneksi gagal: $e');
-});
 }
 
-void stopServer(){
-serverSocket?.close();
-serverSocket = null;
-print("Server ditutup");
+void stopServer() {
+  serverSocket?.close();
+  serverSocket = null;
+  print("Server ditutup");
 }

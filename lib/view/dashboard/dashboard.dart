@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:kasirq/view/history/HistoryPage.dart';
 import 'package:kasirq/view/productpage/produk.dart';
 import 'package:kasirq/view/transaction/Transaction.dart';
 
@@ -112,7 +113,7 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           onPressed: () {
-
+                            Get.to(() => const HistoryPage());
                           },
                           child: SvgPicture.asset(
                             "lib/assets/icons/ic_history.svg",
@@ -230,7 +231,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     trailing: IconButton(
                       onPressed: () {
-                        Get.to(const Produk());
+                        Get.to(() => const Produk());
                       },
                       icon: const Icon(
                         Icons.arrow_forward_ios_rounded,

@@ -24,7 +24,7 @@ class _ProdukState extends State<Produk> {
     setState(() {
       _produk = data;
       _isLoading = false;
-      print(_produk);
+      // print(_produk);
     });
   }
 
@@ -199,6 +199,7 @@ class _ProdukState extends State<Produk> {
                     ),
                     TextField(
                       controller: _hargaController,
+                      keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         hintText: 'Harga',
                       ),
@@ -280,14 +281,22 @@ class _ProdukState extends State<Produk> {
               Icons.upload,
               color: Colors.white,
             ),
-            onPressed: () => {Get.to(() => const SendDataPage())},
+            onPressed: () => {
+              Get.to(() => SendDataPage(
+                    source: 'produk',
+                  ))
+            },
           ),
           IconButton(
             icon: const Icon(
               Icons.download,
               color: Colors.white,
             ),
-            onPressed: () => {Get.to(() => const ReceiveDataPage())},
+            onPressed: () => {
+              Get.to(() => ReceiveDataPage(
+                source: 'produk',
+              ))
+            },
           ),
           IconButton(
               onPressed: _refreshProduk,
@@ -308,7 +317,7 @@ class _ProdukState extends State<Produk> {
                 ElevatedButton(
                     onPressed: () async {
                       CsvImporter importer = CsvImporter();
-                      await importer.importCSV();
+                      await importer.importCSV('produk');
                       _refreshProduk();
                     },
                     child: const Text(
@@ -318,7 +327,7 @@ class _ProdukState extends State<Produk> {
                 ElevatedButton(
                     onPressed: () async {
                       CsvExporter exporter = CsvExporter(_produk);
-                      await exporter.exportCSV();
+                      await exporter.exportCSV('produk');
                     },
                     child: const Text(
                       "Export CSV",

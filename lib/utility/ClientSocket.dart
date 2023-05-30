@@ -1,21 +1,41 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import '../sql_helper/sql_helper.dart';
 
-Future<String> getData() async {
+Future<String> getData(String source) async {
   List<Map<String, dynamic>> dataFromSqflite = [];
-  final data = await SQLHelper.getItems();
+  String jsonString = '';
 
-  // Exclude the "id" field from each data item
-  for (var dataItem in data) {
-    Map<String, dynamic> newDataItem = Map<String, dynamic>.from(dataItem);
-    newDataItem.remove('id');
-    dataFromSqflite.add(newDataItem);
+  if (source == 'produk') {
+    final data = await SQLHelper.getItems();
+
+    // Exclude the "id" field from each data item
+    for (var dataItem in data) {
+      Map<String, dynamic> newDataItem = Map<String, dynamic>.from(dataItem);
+      newDataItem.remove('id');
+      dataFromSqflite.add(newDataItem);
+    }
+
+    jsonString = jsonEncode(dataFromSqflite);
+    print(jsonString);
+
+  } else if (source == 'transaksi') {
+    final data = await SQLHelper.getTransaksi();
+
+    // Exclude the "id" field from each data item
+    for (var dataItem in data) {
+      Map<String, dynamic> newDataItem = Map<String, dynamic>.from(dataItem);
+      newDataItem.remove('id_penjualan');
+      dataFromSqflite.add(newDataItem);
+    }
+
+    jsonString = jsonEncode(dataFromSqflite);
+    // print(jsonString);
   }
-
-  String jsonString = jsonEncode(dataFromSqflite);
-  print(jsonString);
   return jsonString;
 }
 
@@ -54,6 +74,13 @@ Future<void> sendData(String ipAddress, String data) async {
       socket.write('\n');
     }*/
     socket.write(data);
+    // *Bila sukses
+    Get.snackbar(
+      'Sukses',
+      'Data berhasil dikirim ke server',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
 
     // Menerima respons dari server
     socket.listen((List<int> data) {
@@ -63,7 +90,13 @@ Future<void> sendData(String ipAddress, String data) async {
       // Menutup koneksi setelah selesai
       // socket.close();
     });
-  }).catchError((e) {
-    print('Koneksi gagal: $e');
+  }).catchError((error) {
+    Get.snackbar(
+      'Gagal',
+      'Tidak dapat terhubung ke server:  ${error.toString()}',
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 5),
+    );
   });
 }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:kasirq/utility/ServerSocket.dart';
 
 class ReceiveDataPage extends StatefulWidget {
-  const ReceiveDataPage({Key? key}) : super(key: key);
+  ReceiveDataPage({Key? key, required this.source}) : super(key: key);
+  String source;
 
   @override
   State<ReceiveDataPage> createState() => _ReceiveDataPageState();
@@ -29,7 +30,6 @@ class _ReceiveDataPageState extends State<ReceiveDataPage> {
       _buttonLabel = "Close Connection";
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +58,25 @@ class _ReceiveDataPageState extends State<ReceiveDataPage> {
                                   _textLabel = "";
                                 } else {
                                   _ipAddress = value;
-                                  startServer(_ipAddress);
                                   _buttonLabel = "Close Connection";
                                   isServerRunning = true;
-                                  _textLabel = "Server berjalan pada: $_ipAddress";
+                                  _textLabel =
+                                      "Server berjalan pada: $_ipAddress";
+                                  if (widget.source == 'produk') {
+                                    startServer(_ipAddress, 'produk');
+                                  } /*else if (widget.source == 'transaksi') {
+                                    startServer(_ipAddress, 'transaksi');
+                                  }*/
+                                  else {
+                                    startServer(_ipAddress, 'transaksi');
+                                  }
                                 }
                               }))
                         },
                     child: Text(_buttonLabel,
-                        style: const TextStyle(color: Colors.white)))
+                        style: const TextStyle(color: Colors.white))),
+                const SizedBox(height: 10),
+                const Text("*NB: Tekan kembali tombol apabila terjadi error", style: TextStyle(color: Colors.grey)),
               ]),
         ],
       ),

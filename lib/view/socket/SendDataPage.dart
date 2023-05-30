@@ -6,7 +6,8 @@ import 'package:kasirq/utility/ClientSocket.dart';
 import '../../sql_helper/sql_helper.dart';
 
 class SendDataPage extends StatefulWidget {
-  const SendDataPage({Key? key}) : super(key: key);
+  SendDataPage({Key? key, required this.source}) : super(key: key);
+  String source;
 
   @override
   State<SendDataPage> createState() => _SendDataPageState();
@@ -17,6 +18,7 @@ class _SendDataPageState extends State<SendDataPage> {
 
   @override
   Widget build(BuildContext context) {
+    var sourcePage = widget.source == 'produk' ? 'produk' : 'transaksi';
     return Scaffold(
       appBar: AppBar(
           title: const Text(
@@ -31,8 +33,9 @@ class _SendDataPageState extends State<SendDataPage> {
             padding: const EdgeInsets.symmetric(horizontal: 64),
             child: TextFormField(
               controller: _ipController,
+              keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                hintText: "IP Address",
+                hintText: "Masukkan IP address server",
               ),
             ),
           ),
@@ -41,8 +44,8 @@ class _SendDataPageState extends State<SendDataPage> {
           ),
           ElevatedButton(
               onPressed: () => {
-                getData().then((value) => {
-                  sendData(_ipController.text, value)
+                getData(sourcePage).then((value) => {
+                  sendData(_ipController.text, value),
                 })
               },
               child: const Text(

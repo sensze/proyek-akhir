@@ -59,18 +59,19 @@ class _CalculatorState extends State<Calculator> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: inputValue >= widget.totalHarga ? () {
                     importDataTransaksi(
                         widget.quantity.toString(),
                         widget.totalHarga.toString(),
                         inputValue.toString(),
-                        kembalian.toString());
+                        kembalian.toString()
+                    );
                     Get.to(PaymentConfirmation(
                       totalHarga: widget.totalHarga,
                       uang: inputValue,
                       kembalian: kembalian,
                     ));
-                  },
+                  } : null,
                   child: const Text(
                     "Bayar",
                     style: TextStyle(
@@ -98,14 +99,14 @@ Future<void> importDataTransaksi(String total_item, String total_harga,
   if (db != 0) {
     Get.snackbar(
       'Sukses',
-      'Data berhasil disimpan',
+      'Transaksi berhasil disimpan',
       backgroundColor: Colors.green,
       colorText: Colors.white,
     );
   } else {
     Get.snackbar(
       'Gagal',
-      'Data gagal disimpan',
+      'Transaksi gagal disimpan',
       backgroundColor: Colors.red,
       colorText: Colors.white,
     );
