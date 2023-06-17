@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kasirq/const/colors.dart';
+import 'package:kasirq/view/SplashScreen.dart';
 import 'package:kasirq/view/dashboard/dashboard.dart';
 
 void main() {
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
           iconTheme: IconThemeData(color: Colors.white),
         ),
       ),
-      home: const Dashboard(),
+      home: const SplashScreen(),
     );
   }
 }

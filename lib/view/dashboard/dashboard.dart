@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:kasirq/view/history/HistoryPage.dart';
 import 'package:kasirq/view/productpage/produk.dart';
 import 'package:kasirq/view/transaction/Transaction.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../sql_helper/sql_helper.dart';
 
@@ -28,6 +29,7 @@ class _DashboardState extends State<Dashboard> {
       _isLoading = false;
     });
   }
+
 
   @override
   void initState() {

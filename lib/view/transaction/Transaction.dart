@@ -53,7 +53,7 @@ class _TransactionState extends State<Transaction> {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _produk.length > 5 ? 5 : _produk.length,
+                  itemCount: _produk.length,
                   itemBuilder: (context, index) {
                     return Card(
                       elevation: 5,
